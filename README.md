@@ -86,3 +86,4 @@ The **dependency rule** is strictly inward: `api → application → domain` and
 - [Reference vertical slice](docs/architecture/reference-vertical-slice.md)
 - [ADRs](docs/adr/)
 # procurement-system
+# procurement-system
