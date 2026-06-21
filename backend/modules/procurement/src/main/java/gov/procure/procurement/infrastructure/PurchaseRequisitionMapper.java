@@ -1,6 +1,16 @@
 package gov.procure.procurement.infrastructure;
 
+import gov.procure.procurement.domain.BudgetReference;
+import gov.procure.procurement.domain.LineItem;
 import gov.procure.procurement.domain.PurchaseRequisition;
+import gov.procure.procurement.domain.PurchaseRequisitionId;
+import gov.procure.procurement.domain.RequisitionNumber;
+import gov.procure.procurement.domain.RequisitionStatus;
+import gov.procure.procurement.domain.UserId;
+import gov.procure.shared.domain.Money;
+import gov.procure.shared.tenant.TenantId;
+import java.util.Currency;
+import java.util.List;
 import org.springframework.stereotype.Component;
 
 /**
@@ -41,13 +51,26 @@ public class PurchaseRequisitionMapper {
         return entity;
     }
 
-    /**
-     * Rehydrate the aggregate from persistence. A production implementation adds a
-     * package-private {@code PurchaseRequisition.rehydrate(...)} factory that bypasses the
-     * creation event. Stubbed to mark the responsibility boundary.
-     */
+    /** Rehydrate the aggregate from its persistence model via the domain's rehydrate factory. */
     public PurchaseRequisition toDomain(PurchaseRequisitionEntity entity) {
-        throw new UnsupportedOperationException(
-            "Add PurchaseRequisition.rehydrate(...) and map here — see coding-standards.md");
+        Currency currency = Currency.getInstance(entity.currency);
+        List<LineItem> lineItems = entity.lineItems.stream()
+            .map(le -> LineItem.rehydrate(
+                le.id, le.description, le.quantity, le.unitOfMeasure,
+                new Money(le.estimatedUnitPrice, currency),
+                new BudgetReference(le.budgetId, le.accountingCode)))
+            .toList();
+        return PurchaseRequisition.rehydrate(
+            new PurchaseRequisitionId(entity.id),
+            new TenantId(entity.tenantId),
+            new RequisitionNumber(entity.requisitionNumber),
+            new UserId(entity.requesterId),
+            entity.justification,
+            RequisitionStatus.valueOf(entity.status),
+            currency,
+            lineItems,
+            new Money(entity.totalEstimatedAmount, currency),
+            entity.createdAt,
+            entity.updatedAt);
     }
 }

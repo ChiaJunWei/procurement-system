@@ -1,0 +1,25 @@
+# Build output
+backend/**/build/
+backend/.gradle/
+.gradle/
+
+# Gradle wrapper dists cache (the jar + scripts ARE committed)
+backend/gradle/wrapper/dists/
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+
+# Env / secrets
+.env
+.env.local
+*.local

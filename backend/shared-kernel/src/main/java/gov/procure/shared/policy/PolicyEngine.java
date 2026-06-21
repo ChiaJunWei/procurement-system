@@ -10,11 +10,19 @@ public interface PolicyEngine {
 
     PolicyDecision evaluate(PolicyRequest request);
 
-    /** Convenience: evaluate and throw {@code PolicyViolationException} if denied. */
+    /**
+     * Enforce a request with a <strong>default-deny</strong> posture: the action is allowed only on
+     * an explicit PERMIT. An explicit DENY <em>or</em> NOT_APPLICABLE (no rule matched / no policy
+     * set) throws {@code PolicyViolationException}. This is the safe default for a government system —
+     * forgetting to write a permit rule fails closed, not open.
+     */
     default PolicyDecision enforce(PolicyRequest request) {
         PolicyDecision decision = evaluate(request);
-        if (decision.isDenied()) {
-            throw new PolicyViolationException(request.action(), decision.reasons());
+        if (!decision.isPermitted()) {
+            var reasons = decision.reasons().isEmpty()
+                ? java.util.List.of("no applicable permit rule (default deny)")
+                : decision.reasons();
+            throw new PolicyViolationException(request.action(), reasons);
         }
         return decision;
     }

@@ -42,6 +42,13 @@ public class LineItem {
             unitOfMeasure, estimatedUnitPrice, Objects.requireNonNull(budgetReference));
     }
 
+    /** Reconstitute a line item from persistence (no validation; it was valid when stored). */
+    public static LineItem rehydrate(UUID id, String description, BigDecimal quantity,
+            String unitOfMeasure, Money estimatedUnitPrice, BudgetReference budgetReference) {
+        return new LineItem(id, description, quantity, unitOfMeasure, estimatedUnitPrice,
+            budgetReference);
+    }
+
     public Money lineTotal() {
         return estimatedUnitPrice.multiply(quantity);
     }

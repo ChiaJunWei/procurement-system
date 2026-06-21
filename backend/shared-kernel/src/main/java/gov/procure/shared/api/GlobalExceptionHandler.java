@@ -1,6 +1,7 @@
 package gov.procure.shared.api;
 
 import gov.procure.shared.error.DomainException;
+import gov.procure.shared.policy.PolicyViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -13,6 +14,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(PolicyViolationException.class)
+    public ProblemDetail handlePolicy(PolicyViolationException ex) {
+        // Authorization / policy denial.
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
+        pd.setProperty("code", ex.code());
+        pd.setProperty("reasons", ex.reasons());
+        return pd;
+    }
 
     @ExceptionHandler(DomainException.class)
     public ProblemDetail handleDomain(DomainException ex) {

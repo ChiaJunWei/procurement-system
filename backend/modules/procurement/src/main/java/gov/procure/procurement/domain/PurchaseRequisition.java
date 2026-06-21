@@ -79,6 +79,23 @@ public class PurchaseRequisition extends AbstractAggregateRoot<PurchaseRequisiti
         return requisition;
     }
 
+    /**
+     * Reconstitute an aggregate from persistence. Bypasses creation validation and does NOT register
+     * any event — the requisition already exists. Used only by the repository adapter / mapper.
+     */
+    public static PurchaseRequisition rehydrate(PurchaseRequisitionId id, TenantId tenantId,
+            RequisitionNumber number, UserId requesterId, String justification,
+            RequisitionStatus status, Currency currency, List<LineItem> lineItems,
+            Money totalEstimatedCost, Instant createdAt, Instant updatedAt) {
+        var requisition = new PurchaseRequisition(id, tenantId, number, requesterId,
+            justification, currency, createdAt);
+        requisition.status = status;
+        requisition.lineItems.addAll(lineItems);
+        requisition.totalEstimatedCost = totalEstimatedCost;
+        requisition.updatedAt = updatedAt;
+        return requisition;
+    }
+
     private void addLineItem(NewLineItem item) {
         requireDraft();
         var lineItem = LineItem.create(item.description(), item.quantity(),

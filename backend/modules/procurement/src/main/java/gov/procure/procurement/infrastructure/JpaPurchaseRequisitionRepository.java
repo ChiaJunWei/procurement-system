@@ -30,9 +30,10 @@ public class JpaPurchaseRequisitionRepository implements PurchaseRequisitionRepo
 
     @Override
     public PurchaseRequisition save(PurchaseRequisition requisition) {
+        // Persist state only. Event lifecycle (draining to the outbox, clearing) is owned by the
+        // application service — the adapter must NOT clear events or the service can't publish them.
         PurchaseRequisitionEntity entity = mapper.toEntity(requisition);
         jpa.save(entity);
-        requisition.clearDomainEvents();
         return requisition;
     }
 

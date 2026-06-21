@@ -1,0 +1,47 @@
+# ============================================================================
+# MOCK profile — runs the whole platform with NO external services.
+#   - H2 in-memory database (schema created by Hibernate, not Flyway/Postgres)
+#   - Kafka + OAuth2/Keycloak autoconfig excluded
+#   - permit-all security, fixed dev tenant/user, logging event publisher
+# Activate with: --spring.profiles.active=mock
+# Everything mocked here is catalogued in MOCKS.md.
+# ============================================================================
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
+
+  datasource:
+    url: "jdbc:h2:mem:procurement;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE"
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop          # H2 schema generated from entities (Flyway is Postgres-only)
+    defer-datasource-initialization: true
+    properties:
+      hibernate.hbm2ddl.create_namespaces: true   # create the per-context schemas
+
+  flyway:
+    enabled: false                    # Postgres-specific migrations (RLS/jsonb) don't run on H2
+
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:mock/mock-schema.sql
+
+  h2:
+    console:
+      enabled: true                   # browse the in-memory DB at /h2-console
+
+platform:
+  outbox:
+    poll-interval-ms: 2000
+
+logging:
+  level:
+    gov.procure.bootstrap.mock: INFO
+    gov.procure.shared.event: INFO

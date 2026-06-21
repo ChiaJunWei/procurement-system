@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import org.slf4j.MDC;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -20,6 +21,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  */
 @Component
 @Order(1)
+@Profile("!mock") // replaced by MockTenantFilter in the runnable mock profile
 public class TenantContextFilter extends OncePerRequestFilter {
 
     private static final String TENANT_CLAIM = "agency_id";
